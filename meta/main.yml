@@ -1,0 +1,32 @@
+---
+# Ansible meta informace
+#
+# Zavislosti role fusiondirectory
+
+dependencies:
+  - role: webserver
+    tags:
+      - webserver
+
+  - role: php-fpm
+    tags:
+      - php-fpm
+    vars:
+      php_extensions:
+        - 'bcmath'
+        - 'bz2'
+        - 'curl'
+        - 'gd'
+        - 'intl'
+        - 'ldap'
+        - 'mbstring'
+        - 'mysql'
+        - 'soap'
+        - 'xml'
+        - 'zip'
+
+  - role: openldap
+    tags:
+      - openldap
+
+...

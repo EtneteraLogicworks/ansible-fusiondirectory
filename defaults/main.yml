@@ -1,0 +1,107 @@
+---
+# Ansible defaults file
+#
+# Promenne pro roli fusiondirectory
+
+fd_schemadir: '/etc/ldap/schema/fusiondirectory/'
+
+fusiondirectory:
+  vhost:
+    name: 'fusiondirectory'
+    admin_mail: '{{ admin_mail }}'
+    www_root: '/usr/share/fusiondirectory/html'
+    https_enabled: false
+    https_letsencrypt: false
+    https_redirect: true
+    cert: '/etc/ssl/certs/ssl-cert-snakeoil.pem'
+    key: '/etc/ssl/private/ssl-cert-snakeoil.key'
+  access:
+    cn: 'fd'
+    dn: 'cn=fd,ou=users,{{ openldap.searchbase }}'
+  admin:
+    dn: 'uid=fdadmin,ou=people,{{ openldap.searchbase }}'
+    uid: 'fdadmin'
+  apt:
+    repos:
+      - filename: 'fusiondirectory-current'
+        repo: 'deb http://repos.fusiondirectory.org/fusiondirectory-current/debian-stretch stretch main'
+      - filename: 'fusiondirectory-extra'
+        repo: 'deb http://repos.fusiondirectory.org/fusiondirectory-extra/debian-stretch stretch main'
+  plugins:
+    - 'fusiondirectory-plugin-systems'
+    - 'fusiondirectory-plugin-systems-schema'
+    - 'fusiondirectory-plugin-posix'
+    - 'fusiondirectory-plugin-mail'
+    - 'fusiondirectory-plugin-mail-schema'
+    - 'fusiondirectory-plugin-alias'
+    - 'fusiondirectory-plugin-alias-schema'
+    - 'fusiondirectory-plugin-samba'
+    - 'fusiondirectory-plugin-samba-schema'
+    - 'fusiondirectory-plugin-freeradius'
+    - 'fusiondirectory-plugin-freeradius-schema'
+  schemas:
+    - '{{ fd_schemadir }}/service-fd.schema'
+    - '{{ fd_schemadir }}/systems-fd-conf.schema'
+    - '{{ fd_schemadir }}/systems-fd.schema'
+    - '{{ fd_schemadir }}/mail-fd.schema'
+    - '{{ fd_schemadir }}/mail-fd-conf.schema'
+    - '{{ fd_schemadir }}/alias-fd.schema'
+    - '{{ fd_schemadir }}/alias-fd-conf.schema'
+    - '{{ fd_schemadir }}/samba.schema'
+    - '{{ fd_schemadir }}/samba-fd-conf.schema'
+    - '{{ fd_schemadir }}/freeradius.schema'
+  config:
+    fdTheme: 'breezy'
+    fdTimezone: 'Europe/Prague'
+    fusionConfigMd5: '29bbaf4676da323efa95f67165941795'
+    fdSchemaCheck: 'TRUE'
+    fdPasswordDefaultHash: 'crypt/sha-512'
+    fdForcePasswordDefaultHash: 'TRUE'
+    fdListSummary: 'TRUE'
+    fdModificationDetectionAttribute: 'entryCSN'
+    fdLogging: 'TRUE'
+    fdLdapSizeLimit: 200
+    fdLoginAttribute: 'uid,mail'
+    fdWarnSSL: 'TRUE'
+    fdSessionLifeTime: 1800
+    fdHttpHeaderAuthHeaderName: 'AUTH_USER'
+    fdEnableSnapshots: 'TRUE'
+    fdSnapshotBase: 'ou=snapshots,{{ openldap.searchbase }}'
+    fdSslKeyPath: '/etc/ssl/private/fd.key'
+    fdSslCertPath: '/etc/ssl/certs/fd.cert'
+    fdSslCaCertPath: '/etc/ssl/certs/ca.cert'
+    fdCasServerCaCertPath: '/etc/ssl/certs/ca.cert'
+    fdCasHost: 'localhost'
+    fdCasPort: 443
+    fdCasContext: '/cas'
+    fdAccountPrimaryAttribute: 'uid'
+    fdCnPattern: '%givenName% %sn%'
+    fdStrictNamingRules: 'FALSE'
+    fdMinId: 100
+    fdUidNumberBase: 1100
+    fdGidNumberBase: 1100
+    fdUserRDN: 'ou=people'
+    fdGroupRDN: 'ou=groups'
+    fdAclRoleRDN: 'ou=aclroles'
+    fdIdAllocationMethod: 'traditional'
+    fdDebugLevel: 0
+    fdShells: '/bin/bash'
+    fdDefaultShell: '/bin/bash'
+    fdHandleExpiredAccounts: 'FALSE'
+    fdForceSSL: 'FALSE'
+    fdHttpAuthActivated: 'FALSE'
+    fdHttpHeaderAuthActivated: 'FALSE'
+    fdCasActivated: 'FALSE'
+    fdRestrictRoleMembers: 'FALSE'
+    fdDisplayErrors: 'FALSE'
+    fdLdapStats: 'FALSE'
+    fdDisplayHookOutput: 'FALSE'
+    fdAclTabOnObjects: 'FALSE'
+    cn: 'config'
+
+
+# variables for php-fpm role
+php_extra_parameters:
+  upload_tmp_dir: '/var/spool/fusiondirectory/'
+
+...

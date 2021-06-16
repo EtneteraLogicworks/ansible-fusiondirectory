@@ -1,0 +1,28 @@
+---
+# Ansible role
+#
+# Setup fusiondirectory root
+
+- name: Vytvoření konfiguračního adresáře
+  file:
+    state: directory
+    dest: '/etc/ldap/{{ openldap.organization }}'
+
+- name: Příprava LDIF root
+  template:
+    src: 'fd-root.ldif.j2'
+    dest: '/etc/ldap/{{ openldap.organization }}/fd-root.ldif'
+
+- name: Import LDIF root
+  shell: >-
+    ldapmodify
+    -Z
+    -x
+    -w '{{ openldap.admin.password }}'
+    -D '{{ openldap.admin.dn }}'
+    -f '/etc/ldap/{{ openldap.organization }}/fd-root.ldif'
+    && touch '/etc/ldap/{{ openldap.organization }}/fd-root.done'
+  args:
+    creates: '/etc/ldap/{{ openldap.organization }}/fd-root.done'
+
+...

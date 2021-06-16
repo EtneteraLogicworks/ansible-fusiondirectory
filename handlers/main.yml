@@ -1,0 +1,22 @@
+---
+# Ansible handlers
+
+- name: import core schemas
+  command: >-
+    fusiondirectory-insert-schema
+
+- name: update core schemas
+  command: >-
+    fusiondirectory-insert-schema -m
+
+- name: import plugin schemas
+  command: >-
+    fusiondirectory-insert-schema -i '{{ item }}'
+  loop: '{{ fusiondirectory.schemas }}'
+
+- name: update plugin schemas
+  command: >-
+    fusiondirectory-insert-schema -m '{{ item }}'
+  loop: '{{ fusiondirectory.schemas }}'
+
+...

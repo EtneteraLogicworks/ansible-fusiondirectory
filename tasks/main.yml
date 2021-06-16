@@ -1,0 +1,32 @@
+---
+# Ansible role
+#
+# Role fusiondirectory
+
+
+- name: Instalace Fusion Directory
+  import_tasks: 'install.yml'
+  tags:
+    - fusiondirectory-install
+    - fd-install
+
+- name: Setup FD objektů
+  include_tasks: 'setup.yml'
+  when: failover_role != 'backup'
+  tags:
+    - fusiondirectory-setup
+    - fd-setup
+
+- name: Setup FD root objektu
+  import_tasks: 'setup_root.yml'
+  tags:
+    - fusiondirectory-setup
+    - fd-setup
+
+- name: Web Fusion Directory
+  import_tasks: 'web.yml'
+  tags:
+    - fusiondirectory-web
+    - fd-web
+
+...

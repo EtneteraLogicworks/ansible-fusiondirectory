@@ -1,0 +1,122 @@
+---
+# Ansible role
+#
+# Setup fusiondirectory
+
+- name: Setup FusionDirectory v LDAP databázi
+  block:
+    - name: Vytvoření konfigurace
+      ldap_entry:
+        dn: '{{ item.dn }}'
+        objectClass: '{{ item.objectClass }}'
+        attributes: '{{ item.attributes | default(omit) }}'
+        bind_dn: '{{ openldap.admin.dn }}'
+        bind_pw: '{{ openldap.admin.password }}'
+        start_tls: "{{ 'yes' if openldap.tls.enabled else omit }}"
+      loop:
+        - dn: 'ou=fusiondirectory,{{ openldap.searchbase }}'
+          objectClass: 'organizationalUnit'
+          attributes:
+            ou: 'fusiondirectory'
+
+        - dn: 'ou=snapshots,{{ openldap.searchbase }}'
+          objectClass: 'organizationalUnit'
+          attributes:
+            ou: 'snapshots'
+
+        - dn: 'cn=config,ou=fusiondirectory,{{ openldap.searchbase }}'
+          objectClass: 'fusionDirectoryConf'
+          attributes: '{{ fusiondirectory.config }}'
+
+
+    - name: Vytvoření default ACL rolí
+      ldap_entry:
+        dn: '{{ item.dn }}'
+        objectClass: '{{ item.objectClass }}'
+        attributes: '{{ item.attributes | default(omit) }}'
+        bind_dn: '{{ openldap.admin.dn }}'
+        bind_pw: '{{ openldap.admin.password }}'
+        start_tls: "{{ 'yes' if openldap.tls.enabled else omit }}"
+      loop:
+        - dn: 'ou=aclroles,{{ openldap.searchbase }}'
+          objectClass: 'organizationalUnit'
+          attributes:
+            ou: 'aclroles'
+
+        - dn: 'cn=manager,ou=aclroles,{{ openldap.searchbase }}'
+          objectClass:
+            - 'top'
+            - 'gosaRole'
+          attributes:
+            description: 'Give all rights on users in the given branch'
+            cn: 'manager'
+            gosaAclTemplate: '0:user/user;cmdrw,user/posixAccount;cmdrw'
+
+        - dn: 'cn=editownpwd,ou=aclroles,{{ openldap.searchbase }}'
+          objectClass:
+            - 'top'
+            - 'gosaRole'
+          attributes:
+            description: 'Allow users to edit their own password (use only on base)'
+            cn: 'editownpwd'
+            gosaAclTemplate: '0:user/user;s#userPassword;rw'
+
+        - dn: 'cn=editowninfos,ou=aclroles,{{ openldap.searchbase }}'
+          objectClass:
+            - 'top'
+            - 'gosaRole'
+          attributes:
+            description: 'Allow users to edit their own information (main tab and posix use only on base)'
+            cn: 'editowninfos'
+            gosaAclTemplate: '0:user/user;srw,user/posixAccount;srw'
+
+        - dn: 'cn=admin,ou=aclroles,{{ openldap.searchbase }}'
+          objectClass:
+            - 'top'
+            - 'gosaRole'
+          attributes:
+            description: 'Gives all rights on all objects'
+            cn: 'admin'
+            gosaAclTemplate: '0:all;cmdrw'
+
+
+    - name: Vytvoření admin uživatele
+      ldap_entry:
+        dn: '{{ item.dn }}'
+        objectClass: '{{ item.objectClass }}'
+        attributes: '{{ item.attributes | default(omit) }}'
+        bind_dn: '{{ openldap.admin.dn }}'
+        bind_pw: '{{ openldap.admin.password }}'
+        start_tls: "{{ 'yes' if openldap.tls.enabled else omit }}"
+      loop:
+        - dn: 'ou=people,{{ openldap.searchbase }}'
+          objectClass: organizationalUnit
+          attributes:
+            description: 'LDAP access users.'
+            ou: 'people'
+
+        - dn: '{{ fusiondirectory.admin.dn }}'
+          objectClass:
+            - 'inetOrgPerson'
+            - 'organizationalPerson'
+            - 'person'
+          attributes:
+            cn: 'System Administrator'
+            sn: 'Administrator'
+            givenName: 'System'
+            uid: '{{ fusiondirectory.admin.uid }}'
+            userPassword: ''
+
+    - name: Nastavení hesla admin uživatele
+      ldap_passwd:
+        dn: '{{ fusiondirectory.admin.dn }}'
+        passwd: '{{ fusiondirectory.admin.password }}'
+        bind_dn: '{{ openldap.admin.dn }}'
+        bind_pw: '{{ openldap.admin.password }}'
+        start_tls: "{{ 'yes' if openldap.tls.enabled else omit }}"
+
+  tags:
+    - fusiondirectory-setup
+    - fd-setup
+
+...

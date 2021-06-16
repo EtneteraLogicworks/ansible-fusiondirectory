@@ -1,0 +1,14 @@
+dn: {{ openldap.searchbase }}
+changetype: modify
+add: objectClass
+objectClass: gosaDepartment
+objectClass: gosaAcl
+-
+add: ou
+ou: {{ openldap.organization }}
+-
+add: gosaAclEntry
+gosaAclEntry: 0:subtree:{{ ('cn=admin,ou=aclroles' + ',' + openldap.searchbase) | b64encode }}:{{ fusiondirectory.admin.dn | b64encode }}
+-
+add: description
+description: {{ openldap.organization }}

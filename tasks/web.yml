@@ -1,0 +1,42 @@
+---
+# Ansible role
+#
+# Web fusiondirectory
+
+- name: Certifikat pro default vhost
+  include_tasks: 'includes/letsencrypt/main.yml'
+  vars:
+    certificate: '{{ fusiondirectory.vhost }}'
+    # nespousti na backup serveru, pokud existuje HA setup
+  when: fusiondirectory.vhost.https_letsencrypt and failover_role != 'backup'
+  tags:
+    - certs
+    - letsencrypt
+
+- name: Vytvoření konfigurace FusionDirectory webu
+  template:
+    src: 'vhost_fusiondirectory.conf.j2'
+    dest: '/etc/apache2/sites-available/{{ fusiondirectory.vhost.name }}.conf'
+  notify: Reload apache
+  vars:
+    vhost: '{{ fusiondirectory.vhost }}'
+  tags:
+    - vhost
+
+- name: Odstranění výchozího nastavení webu
+  file:
+    state: absent
+    path: '/etc/apache2/conf-enabled/fusiondirectory.conf'
+  notify: Reload apache
+
+- name: Aktivace webu FusionDirectory
+  file:
+    path: '/etc/apache2/sites-enabled/{{ fusiondirectory.vhost.name }}.conf'
+    state: link
+    src: '../sites-available/{{ fusiondirectory.vhost.name }}.conf'
+    force: yes
+  notify: Reload apache
+  tags:
+    - vhost
+
+...

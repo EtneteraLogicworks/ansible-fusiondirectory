@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<conf>
+  <!-- Main section **********************************************************
+       The main section defines global settings, which might be overridden by
+       each location definition inside.
+
+       For more information about the configuration parameters, take a look at
+       the FusionDirectory.conf(5) manual page.
+  -->
+  <main default="{{ openldap.organization }}"
+        logging="TRUE"
+        displayErrors="FALSE"
+        forceSSL="FALSE"
+        templateCompileDirectory="/var/spool/fusiondirectory/"
+        debugLevel="0"
+    >
+
+    <!-- Location definition -->
+    <location name="{{ openldap.organization }}" {{ 'ldapTLS="TRUE"' if openldap.tls.enabled else '' }}
+    >
+        <referral URI="ldap://{{ fusiondirectory.ldaphost | default('localhost') }}:389/{{ openldap.searchbase }}"
+                        adminDn="{{ fusiondirectory.access.dn }}"
+                        adminPassword="{{ fusiondirectory.access.password }}" />
+    </location>
+  </main>
+</conf>
